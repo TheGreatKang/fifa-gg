@@ -28,39 +28,57 @@ module.exports = {
     
     try {
       // 내 닉네임으로 accessId 가져오기
-      const myAccessId = await fetch(`https://api.nexon.co.kr/fifaonline4/v1.0/users?nickname=${encodeURIComponent(myNickname)}`, {
+      console.log(`요청 URL: https://open.api.nexon.com/fconline/v1/id?nickname=${encodeURIComponent(myNickname)}`);
+      
+      const myResponse = await fetch(`https://open.api.nexon.com/fconline/v1/id?nickname=${encodeURIComponent(myNickname)}`, {
         headers: { 'Authorization': process.env.API_KEY }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
-        return res.json();
       });
+      
+      if (!myResponse.ok) {
+        const errorText = await myResponse.text().catch(e => 'No response body');
+        console.error(`API 오류 내용: ${errorText}`);
+        throw new Error(`API 응답 오류: ${myResponse.status} - ${errorText}`);
+      }
+      
+      const myAccessId = await myResponse.json();
       
       if (!myAccessId || !myAccessId.accessId) {
         return interaction.editReply(`'${myNickname}' 닉네임을 찾을 수 없습니다.`);
       }
       
       // 상대방 닉네임으로 accessId 가져오기
-      const opponentAccessId = await fetch(`https://api.nexon.co.kr/fifaonline4/v1.0/users?nickname=${encodeURIComponent(opponentNickname)}`, {
+      console.log(`요청 URL: https://open.api.nexon.com/fconline/v1/id?nickname=${encodeURIComponent(opponentNickname)}`);
+      
+      const opponentResponse = await fetch(`https://open.api.nexon.com/fconline/v1/id?nickname=${encodeURIComponent(opponentNickname)}`, {
         headers: { 'Authorization': process.env.API_KEY }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
-        return res.json();
       });
+      
+      if (!opponentResponse.ok) {
+        const errorText = await opponentResponse.text().catch(e => 'No response body');
+        console.error(`API 오류 내용: ${errorText}`);
+        throw new Error(`API 응답 오류: ${opponentResponse.status} - ${errorText}`);
+      }
+      
+      const opponentAccessId = await opponentResponse.json();
       
       if (!opponentAccessId || !opponentAccessId.accessId) {
         return interaction.editReply(`'${opponentNickname}' 닉네임을 찾을 수 없습니다.`);
       }
       
       // 내 매치 ID 목록 가져오기 (1:1 매치 타입 40)
-      const matchIds = await fetch(`https://api.nexon.co.kr/fifaonline4/v1.0/users/${myAccessId.accessId}/matches?matchtype=40&offset=${offset}&limit=100`, {
+      console.log(`요청 URL: https://open.api.nexon.com/fconline/v1/matches?game_type=40&offset=${offset}&limit=100&nickname=${encodeURIComponent(myNickname)}`);
+      
+      const matchResponse = await fetch(`https://open.api.nexon.com/fconline/v1/matches?game_type=40&offset=${offset}&limit=100&nickname=${encodeURIComponent(myNickname)}`, {
         headers: { 'Authorization': process.env.API_KEY }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
-        return res.json();
       });
+      
+      if (!matchResponse.ok) {
+        const errorText = await matchResponse.text().catch(e => 'No response body');
+        console.error(`API 오류 내용: ${errorText}`);
+        throw new Error(`API 응답 오류: ${matchResponse.status} - ${errorText}`);
+      }
+      
+      const matchIds = await matchResponse.json();
       
       if (!matchIds || matchIds.length === 0) {
         return interaction.editReply(`'${myNickname}'님의 추가 1:1 매치 기록이 없습니다.`);
@@ -68,10 +86,17 @@ module.exports = {
       
       // 매치 상세 정보 가져오기
       const matchInfos = await Promise.all(matchIds.map(async matchId => {
-        const res = await fetch(`https://api.nexon.co.kr/fifaonline4/v1.0/matches/${matchId}`, {
+        console.log(`요청 URL: https://open.api.nexon.com/fconline/v1/match-detail?match_id=${matchId}`);
+        
+        const res = await fetch(`https://open.api.nexon.com/fconline/v1/match-detail?match_id=${matchId}`, {
           headers: { 'Authorization': process.env.API_KEY }
         });
-        if (!res.ok) return null;
+        
+        if (!res.ok) {
+          console.error(`매치 ID ${matchId} 정보 가져오기 실패: ${res.status}`);
+          return null;
+        }
+        
         return res.json();
       }));
       
