@@ -6,9 +6,7 @@ const { Client, Collection, GatewayIntentBits, REST, Routes } = require('discord
 // Discord 클라이언트 생성
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.Guilds
   ]
 });
 
