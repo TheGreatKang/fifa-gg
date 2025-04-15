@@ -1,0 +1,25 @@
+{
+  "name": "fifa-gg",
+  "version": "1.0.0",
+  "description": "FIFA 온라인 4 1:1 전적 검색 Discord 봇",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "fifa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cross-fetch": "^3.1.5",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
